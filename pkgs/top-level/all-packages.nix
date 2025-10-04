@@ -119,7 +119,7 @@ with pkgs;
     You should not evaluate entire Nixpkgs without measures to handle failing packages.
   '';
 
-  tests = callPackages ../test { };
+  tests = lib.recurseIntoAttrs (callPackages ../test { });
 
   defaultPkgConfigPackages =
     # We don't want nix-env -q to enter this, because all of these are aliases.
@@ -728,6 +728,8 @@ with pkgs;
   fetchFrom9Front = callPackage ../build-support/fetch9front { };
 
   fetchFromRepoOrCz = callPackage ../build-support/fetchrepoorcz { };
+
+  fetchFromRadicle = callPackage ../build-support/fetchradicle { };
 
   fetchgx = callPackage ../build-support/fetchgx { };
 
@@ -2370,10 +2372,6 @@ with pkgs;
 
   patool = with python3Packages; toPythonApplication patool;
 
-  pocket-casts = callPackage ../by-name/po/pocket-casts/package.nix {
-    electron = electron_35;
-  };
-
   pixcat = with python3Packages; toPythonApplication pixcat;
 
   pyznap = python3Packages.callPackage ../tools/backup/pyznap { };
@@ -2401,7 +2399,7 @@ with pkgs;
 
   roundcube = callPackage ../servers/roundcube { };
 
-  roundcubePlugins = dontRecurseIntoAttrs (callPackage ../servers/roundcube/plugins { });
+  roundcubePlugins = recurseIntoAttrs (callPackage ../servers/roundcube/plugins { });
 
   rsyslog = callPackage ../tools/system/rsyslog {
     withHadoop = false; # Currently Broken
@@ -3041,11 +3039,11 @@ with pkgs;
     garage_0_9
     garage_0_8_7
     garage_0_9_4
-    garage_1_2_0
+    garage_1_3_0
     garage_1_x
     garage_1
 
-    garage_2_0_0
+    garage_2_1_0
     garage_2
     ;
 
@@ -3145,6 +3143,7 @@ with pkgs;
     godot3-mono-server
     godotPackages_4_3
     godotPackages_4_4
+    godotPackages_4_5
     godotPackages_4
     godotPackages
     godot_4_3
@@ -3153,6 +3152,9 @@ with pkgs;
     godot_4_4
     godot_4_4-mono
     godot_4_4-export-templates-bin
+    godot_4_5
+    godot_4_5-mono
+    godot_4_5-export-templates-bin
     godot_4
     godot_4-mono
     godot_4-export-templates-bin
@@ -3639,9 +3641,9 @@ with pkgs;
 
   importNpmLock = callPackages ../build-support/node/import-npm-lock { };
 
-  nodePackages_latest = dontRecurseIntoAttrs nodejs_latest.pkgs;
+  nodePackages_latest = recurseIntoAttrs nodejs_latest.pkgs;
 
-  nodePackages = dontRecurseIntoAttrs nodejs.pkgs;
+  nodePackages = recurseIntoAttrs nodejs.pkgs;
 
   node2nix = nodePackages.node2nix;
 
@@ -4176,13 +4178,7 @@ with pkgs;
     inherit (darwin) DarwinTools;
   };
 
-  platformioPackages = dontRecurseIntoAttrs (callPackage ../development/embedded/platformio { });
-  platformio =
-    if stdenv.hostPlatform.isLinux then
-      platformioPackages.platformio-chrootenv
-    else
-      platformioPackages.platformio-core;
-  platformio-core = platformioPackages.platformio-core;
+  platformio = if stdenv.hostPlatform.isLinux then platformio-chrootenv else platformio-core;
 
   playbar2 = libsForQt5.callPackage ../applications/audio/playbar2 { };
 
@@ -4281,7 +4277,7 @@ with pkgs;
 
   qlcplus = libsForQt5.callPackage ../applications/misc/qlcplus { };
 
-  qdigidoc = libsForQt5.callPackage ../tools/security/qdigidoc { };
+  qdigidoc = callPackage ../tools/security/qdigidoc { };
 
   qjournalctl = libsForQt5.callPackage ../applications/system/qjournalctl { };
 
@@ -4538,6 +4534,8 @@ with pkgs;
 
   teamviewer = libsForQt5.callPackage ../applications/networking/remote/teamviewer { };
 
+  buildTeleport = callPackage ../build-support/teleport { };
+
   telepresence = callPackage ../tools/networking/telepresence {
     pythonPackages = python3Packages;
   };
@@ -4613,11 +4611,6 @@ with pkgs;
   translatelocally-models = recurseIntoAttrs (callPackages ../misc/translatelocally-models { });
 
   translatepy = with python3.pkgs; toPythonApplication translatepy;
-
-  inherit (callPackage ../applications/office/trilium { })
-    trilium-desktop
-    trilium-server
-    ;
 
   trytond = with python3Packages; toPythonApplication trytond;
 
@@ -5553,10 +5546,10 @@ with pkgs;
 
   # Haskell and GHC
 
-  haskell = callPackage ./haskell-packages.nix { };
+  haskell = recurseIntoAttrs (callPackage ./haskell-packages.nix { });
 
   haskellPackages =
-    dontRecurseIntoAttrs
+    recurseIntoAttrs
       # Prefer native-bignum to avoid linking issues with gmp
       # GHC 9.6 rts can't be built statically with hadrian, so we need to use 9.4
       # until 9.8 is ready
@@ -5572,10 +5565,7 @@ with pkgs;
           haskell.packages.ghc96
         else
           haskell.packages.ghc98
-      )
-    // {
-      __recurseIntoDerivationForReleaseJobs = true;
-    };
+      );
 
   # haskellPackages.ghc is build->host (it exposes the compiler used to build the
   # set, similarly to stdenv.cc), but pkgs.ghc should be host->target to be more
@@ -5689,7 +5679,7 @@ with pkgs;
 
   gwt240 = callPackage ../development/compilers/gwt/2.4.0.nix { };
 
-  idrisPackages = dontRecurseIntoAttrs (
+  idrisPackages = recurseIntoAttrs (
     callPackage ../development/idris-modules {
       idris-no-deps = haskellPackages.idris;
       pkgs = pkgs.__splicedPackages;
@@ -5771,6 +5761,10 @@ with pkgs;
   jre = jdk;
   jre_headless = jdk_headless;
 
+  jre11_minimal = callPackage ../development/compilers/openjdk/jre.nix {
+    jdk = jdk11;
+    jdkOnBuild = buildPackages.jdk11;
+  };
   jre17_minimal = callPackage ../development/compilers/openjdk/jre.nix {
     jdk = jdk17;
     jdkOnBuild = buildPackages.jdk17;
@@ -6047,6 +6041,9 @@ with pkgs;
   rust_1_86 = callPackage ../development/compilers/rust/1_86.nix {
     llvm_19 = llvmPackages_19.libllvm;
   };
+  rust_1_88 = callPackage ../development/compilers/rust/1_88.nix {
+    llvm_20 = llvmPackages_20.libllvm;
+  };
   rust = rust_1_86;
 
   mrustc = callPackage ../development/compilers/mrustc { };
@@ -6056,6 +6053,7 @@ with pkgs;
   };
 
   rustPackages_1_86 = rust_1_86.packages.stable;
+  rustPackages_1_88 = rust_1_88.packages.stable;
   rustPackages = rustPackages_1_86;
 
   inherit (rustPackages)
@@ -6101,6 +6099,7 @@ with pkgs;
     cargo-pgrx_0_12_0_alpha_1
     cargo-pgrx_0_12_5
     cargo-pgrx_0_12_6
+    cargo-pgrx_0_14_1
     ;
   cargo-pgrx = cargo-pgrx_0_12_6;
 
@@ -6609,7 +6608,7 @@ with pkgs;
 
   pypy = pypy2;
   pypy2 = pypy27;
-  pypy3 = pypy310;
+  pypy3 = pypy311;
 
   # Python interpreter that is build with all modules, including tkinter.
   # These are for compatibility and should not be used inside Nixpkgs.
@@ -6683,6 +6682,7 @@ with pkgs;
     python3Minimal
     pypy27
     pypy310
+    pypy311
     ;
 
   # List of extensions with overrides to apply to all Python package sets.
@@ -6700,6 +6700,7 @@ with pkgs;
   pypy27Packages = pypy27.pkgs;
   pypy3Packages = pypy3.pkgs;
   pypy310Packages = pypy310.pkgs;
+  pypy311Packages = pypy311.pkgs;
 
   pythonManylinuxPackages = callPackage ./../development/interpreters/python/manylinux { };
 
@@ -6956,6 +6957,7 @@ with pkgs;
     electron_35-bin
     electron_36-bin
     electron_37-bin
+    electron_38-bin
     ;
 
   inherit (callPackages ../development/tools/electron/chromedriver { })
@@ -6964,6 +6966,7 @@ with pkgs;
     electron-chromedriver_35
     electron-chromedriver_36
     electron-chromedriver_37
+    electron-chromedriver_38
     ;
 
   electron_33 = electron_33-bin;
@@ -6983,6 +6986,11 @@ with pkgs;
       electron-source.electron_37
     else
       electron_37-bin;
+  electron_38 =
+    if lib.meta.availableOn stdenv.hostPlatform electron-source.electron_38 then
+      electron-source.electron_38
+    else
+      electron_38-bin;
   electron = electron_35;
   electron-bin = electron_35-bin;
   electron-chromedriver = electron-chromedriver_35;
@@ -8372,7 +8380,7 @@ with pkgs;
 
   #GMP ex-satellite, so better keep it near gmp
   # A GMP fork
-  gns3Packages = dontRecurseIntoAttrs (callPackage ../applications/networking/gns3 { });
+  gns3Packages = recurseIntoAttrs (callPackage ../applications/networking/gns3 { });
   gns3-gui = gns3Packages.guiStable;
   gns3-server = gns3Packages.serverStable;
 
@@ -8542,7 +8550,7 @@ with pkgs;
 
   hunspellWithDicts = dicts: callPackage ../by-name/hu/hunspell/wrapper.nix { inherit dicts; };
 
-  hydra = callPackage ../by-name/hy/hydra/package.nix { nix = nixVersions.nix_2_28; };
+  hydra = callPackage ../by-name/hy/hydra/package.nix { nix = nixVersions.nix_2_29; };
 
   icu-versions = callPackages ../development/libraries/icu { };
   inherit (icu-versions)
@@ -9205,6 +9213,8 @@ with pkgs;
   };
 
   nss_latest = callPackage ../development/libraries/nss/latest.nix { };
+  nss_3_115 = callPackage ../development/libraries/nss/3_115.nix { };
+  nss_3_114 = callPackage ../development/libraries/nss/3_114.nix { };
   nss_esr = callPackage ../development/libraries/nss/esr.nix { };
   nss = nss_esr;
   nssTools = nss.tools;
@@ -9444,8 +9454,6 @@ with pkgs;
     inherit (lomiri) cmake-extras;
   };
 
-  qolibri = libsForQt5.callPackage ../applications/misc/qolibri { };
-
   quarto = callPackage ../development/libraries/quarto { };
 
   quartoMinimal = callPackage ../development/libraries/quarto {
@@ -9483,22 +9491,18 @@ with pkgs;
     }
   );
 
-  libsForQt5 =
-    (recurseIntoAttrs (
-      import ./qt5-packages.nix {
-        inherit
-          lib
-          config
-          __splicedPackages
-          makeScopeWithSplicing'
-          generateSplicesForMkScope
-          pkgsHostTarget
-          ;
-      }
-    ))
-    // {
-      __recurseIntoDerivationForReleaseJobs = true;
-    };
+  libsForQt5 = recurseIntoAttrs (
+    import ./qt5-packages.nix {
+      inherit
+        lib
+        config
+        __splicedPackages
+        makeScopeWithSplicing'
+        generateSplicesForMkScope
+        pkgsHostTarget
+        ;
+    }
+  );
 
   # plasma5Packages maps to the Qt5 packages set that is used to build the plasma5 desktop
   plasma5Packages = libsForQt5;
@@ -9549,7 +9553,7 @@ with pkgs;
   redland = librdf_redland; # added 2018-04-25
 
   renovate = callPackage ../by-name/re/renovate/package.nix {
-    nodejs = nodejs_22;
+    nodejs = nodejs_20;
   };
 
   qradiolink = callPackage ../applications/radio/qradiolink {
@@ -9956,9 +9960,11 @@ with pkgs;
 
   ### DEVELOPMENT / LIBRARIES / AGDA
 
-  agdaPackages = callPackage ./agda-packages.nix {
-    inherit (haskellPackages) Agda;
-  };
+  agdaPackages = recurseIntoAttrs (
+    callPackage ./agda-packages.nix {
+      inherit (haskellPackages) Agda;
+    }
+  );
   agda = agdaPackages.agda;
 
   ### DEVELOPMENT / LIBRARIES / BASH
@@ -10339,6 +10345,7 @@ with pkgs;
     asterisk-lts
     asterisk_18
     asterisk_20
+    asterisk_22
     ;
 
   asterisk-ldap = lowPrio (asterisk.override { ldapSupport = true; });
@@ -10356,7 +10363,9 @@ with pkgs;
 
   clickhouse-cli = with python3Packages; toPythonApplication clickhouse-cli;
 
-  couchdb3 = callPackage ../servers/http/couchdb/3.nix { };
+  couchdb3 = callPackage ../servers/http/couchdb/3.nix {
+    erlang = beamMinimalPackages.erlang;
+  };
 
   dcnnt = python3Packages.callPackage ../servers/dcnnt { };
 
@@ -10626,7 +10635,7 @@ with pkgs;
   outline = callPackage ../servers/web-apps/outline (
     lib.fix (super: {
       yarn = yarn.override { inherit (super) nodejs; };
-      nodejs = nodejs_20;
+      nodejs = nodejs_22;
     })
   );
 
@@ -11117,7 +11126,7 @@ with pkgs;
   # Even though this is a set of packages not single package, use `callPackage`
   # not `callPackages` so the per-package callPackages don't have their
   # `.override` clobbered. C.F. `llvmPackages` which does the same.
-  darwin = recurseIntoAttrs (callPackage ./darwin-packages.nix { });
+  darwin = callPackage ./darwin-packages.nix { };
 
   displaylink = callPackage ../os-specific/linux/displaylink {
     inherit (linuxPackages) evdi;
@@ -11910,12 +11919,6 @@ with pkgs;
     inherit (plasma5Packages) breeze-icons;
   };
 
-  zeal-qt5 = libsForQt5.callPackage ../data/documentation/zeal { };
-  zeal = zeal-qt5;
-  zeal-qt6 = qt6Packages.callPackage ../data/documentation/zeal {
-    qtx11extras = null; # Because it does not exist in qt6
-  };
-
   ### APPLICATIONS / GIS
 
   qgis-ltr = callPackage ../applications/gis/qgis/ltr.nix { };
@@ -12475,18 +12478,6 @@ with pkgs;
           buildMozillaMach
           ;
       };
-  firefox-esr-128-unwrapped =
-    import ../applications/networking/browsers/firefox/packages/firefox-esr-128.nix
-      {
-        inherit
-          stdenv
-          lib
-          callPackage
-          fetchurl
-          nixosTests
-          buildMozillaMach
-          ;
-      };
   firefox-esr-140-unwrapped =
     import ../applications/networking/browsers/firefox/packages/firefox-esr-140.nix
       {
@@ -12499,7 +12490,7 @@ with pkgs;
           buildMozillaMach
           ;
       };
-  firefox-esr-unwrapped = firefox-esr-128-unwrapped;
+  firefox-esr-unwrapped = firefox-esr-140-unwrapped;
 
   firefox = wrapFirefox firefox-unwrapped { };
   firefox-beta = wrapFirefox firefox-beta-unwrapped { };
@@ -12507,17 +12498,12 @@ with pkgs;
 
   firefox-mobile = callPackage ../applications/networking/browsers/firefox/mobile-config.nix { };
 
-  firefox-esr-128 = wrapFirefox firefox-esr-128-unwrapped {
-    nameSuffix = "-esr";
-    wmClass = "firefox-esr";
-    icon = "firefox-esr";
-  };
   firefox-esr-140 = wrapFirefox firefox-esr-140-unwrapped {
     nameSuffix = "-esr";
     wmClass = "firefox-esr";
     icon = "firefox-esr";
   };
-  firefox-esr = firefox-esr-128;
+  firefox-esr = firefox-esr-140;
 
   firefox-bin-unwrapped = callPackage ../applications/networking/browsers/firefox-bin {
     inherit (firefox-unwrapped.passthru) applicationName;
@@ -13655,6 +13641,7 @@ with pkgs;
   };
 
   palemoon-bin = callPackage ../applications/networking/browsers/palemoon/bin.nix { };
+  palemoon-gtk2-bin = palemoon-bin.override { withGTK3 = false; };
 
   pantalaimon = callPackage ../applications/networking/instant-messengers/pantalaimon { };
 
@@ -14212,6 +14199,9 @@ with pkgs;
 
   thunderbird-128-unwrapped = thunderbirdPackages.thunderbird-128;
   thunderbird-128 = wrapThunderbird thunderbirdPackages.thunderbird-128 { };
+
+  thunderbird-140-unwrapped = thunderbirdPackages.thunderbird-140;
+  thunderbird-140 = wrapThunderbird thunderbirdPackages.thunderbird-140 { };
 
   thunderbird-bin = thunderbird-latest-bin;
   thunderbird-latest-bin = wrapThunderbird thunderbird-latest-bin-unwrapped {
@@ -16555,9 +16545,7 @@ with pkgs;
 
   resp-app = libsForQt5.callPackage ../applications/misc/resp-app { };
 
-  pgadmin4 = callPackage ../tools/admin/pgadmin { };
-
-  pgadmin4-desktopmode = callPackage ../tools/admin/pgadmin { server-mode = false; };
+  pgadmin4-desktopmode = pgadmin4.override { server-mode = false; };
 
   pgmodeler = qt6Packages.callPackage ../applications/misc/pgmodeler { };
 
@@ -16991,4 +16979,6 @@ with pkgs;
   rustdesk-flutter = callPackage ../by-name/ru/rustdesk-flutter/package.nix {
     flutter = flutter324;
   };
+
+  vips_8_17 = callPackage ../by-name/vi/vips/8_17.nix { };
 }

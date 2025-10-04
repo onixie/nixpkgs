@@ -246,6 +246,8 @@ let
 
         coin = callPackage ../development/ocaml-modules/coin { };
 
+        colombe = callPackage ../development/ocaml-modules/colombe { };
+
         color = callPackage ../development/ocaml-modules/color { };
 
         colors = callPackage ../development/ocaml-modules/colors { };
@@ -851,7 +853,7 @@ let
           else
             null;
 
-        janeStreet =
+        janeStreet = lib.recurseIntoAttrs (
           if lib.versionOlder "5.1" ocaml.version then
             import ../development/ocaml-modules/janestreet/0.17.nix {
               inherit self;
@@ -908,7 +910,8 @@ let
             }
           else
             import ../development/ocaml-modules/janestreet {
-            };
+            }
+        );
 
         janeStreet_0_15 =
           (lib.makeScope self.newScope (
@@ -1124,6 +1127,8 @@ let
         letsencrypt-dns = callPackage ../development/ocaml-modules/letsencrypt/dns.nix { };
 
         letsencrypt-mirage = callPackage ../development/ocaml-modules/letsencrypt/mirage.nix { };
+
+        letters = callPackage ../development/ocaml-modules/letters { };
 
         libc = callPackage ../development/ocaml-modules/libc { };
 
@@ -1950,6 +1955,8 @@ let
         semaphore-compat = callPackage ../development/ocaml-modules/semaphore-compat { };
 
         semver = callPackage ../development/ocaml-modules/semver { };
+
+        sendmail = callPackage ../development/ocaml-modules/colombe/sendmail.nix { };
 
         seq = callPackage ../development/ocaml-modules/seq { };
 

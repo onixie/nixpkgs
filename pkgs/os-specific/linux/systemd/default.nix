@@ -197,7 +197,7 @@ assert withBootloader -> withEfi;
 let
   wantCurl = withRemote || withImportd;
 
-  version = "257.6";
+  version = "257.9";
 
   # Use the command below to update `releaseTimestamp` on every (major) version
   # change. More details in the commentary at mesonFlags.
@@ -215,7 +215,7 @@ stdenv.mkDerivation (finalAttrs: {
     owner = "systemd";
     repo = "systemd";
     rev = "v${version}";
-    hash = "sha256-Myb/ra7NQTDzN7B9jn8svbhTrLSfiqWaSxREe/nDyYo=";
+    hash = "sha256-3Ig5TXhK99iOu41k4c5CgC4R3HhBftSAb9UbXvFY6lo=";
   };
 
   # On major changes, or when otherwise required, you *must* :
@@ -244,15 +244,16 @@ stdenv.mkDerivation (finalAttrs: {
     ./0015-tpm2_context_init-fix-driver-name-checking.patch
     ./0016-systemctl-edit-suggest-systemdctl-edit-runtime-on-sy.patch
     ./0017-meson.build-do-not-create-systemdstatedir.patch
-    ./0018-Revert-bootctl-update-list-remove-all-instances-of-s.patch # https://github.com/systemd/systemd/issues/33392
+
     # systemd tries to link the systemd-ssh-proxy ssh config snippet with tmpfiles
     # if the install prefix is not /usr, but that does not work for us
     # because we include the config snippet manually
-    ./0019-meson-Don-t-link-ssh-dropins.patch
-    ./0020-install-unit_file_exists_full-follow-symlinks.patch
+    ./0018-meson-Don-t-link-ssh-dropins.patch
+
+    ./0019-install-unit_file_exists_full-follow-symlinks.patch
   ]
   ++ lib.optionals (stdenv.hostPlatform.isLinux && stdenv.hostPlatform.isGnu) [
-    ./0021-timesyncd-disable-NSCD-when-DNSSEC-validation-is-dis.patch
+    ./0020-timesyncd-disable-NSCD-when-DNSSEC-validation-is-dis.patch
   ]
   ++ lib.optionals stdenv.hostPlatform.isMusl (
     let

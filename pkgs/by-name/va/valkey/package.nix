@@ -24,13 +24,13 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "valkey";
-  version = "8.0.3";
+  version = "8.0.5";
 
   src = fetchFromGitHub {
     owner = "valkey-io";
     repo = "valkey";
     rev = finalAttrs.version;
-    hash = "sha256-IzerctJUc478dJu2AH20s/A3psiAZWDjQG3USQWqpos=";
+    hash = "sha256-hI5DaKuePmfvWV3+Ol1JGlJrxeoRzbYLQw4QwtDX15o=";
   };
 
   patches = [
@@ -96,11 +96,16 @@ stdenv.mkDerivation (finalAttrs: {
     sed -i '/^proc wait_load_handlers_disconnected/{n ; s/wait_for_condition 50 100/wait_for_condition 50 500/; }' \
       tests/support/util.tcl
 
-    # skip some more flaky tests
+    CLIENTS="$NIX_BUILD_CORES"
+    if (( $CLIENTS > 4)); then
+      CLIENTS=4
+    fi
+
+    # Skip some more flaky tests.
     ./runtest \
       --no-latency \
       --timeout 2000 \
-      --clients $NIX_BUILD_CORES \
+      --clients "$CLIENTS" \
       --tags -leaks \
       --skipunit integration/failover \
       --skipunit integration/aof-multi-part

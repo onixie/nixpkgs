@@ -2059,7 +2059,17 @@ with self;
       url = "mirror://cpan/authors/id/E/EH/EHUELS/Authen-SASL-2.1700.tar.gz";
       hash = "sha256-uG1aV2uNOHruJPOfR6VK/RS7ZrCQA9tQZQAfHeA6js4=";
     };
-    propagatedBuildInputs = [ DigestHMAC ];
+    patches = [
+      (fetchurl {
+        name = "CVE-2025-40918.patch";
+        url = "https://security.metacpan.org/patches/A/Authen-SASL/2.1800/CVE-2025-40918-r1.patch";
+        hash = "sha256-2Mk6RoD7tI8V6YFV8gs08LLs0QeMJqwGz/eZ6zXBBpw=";
+      })
+    ];
+    propagatedBuildInputs = [
+      DigestHMAC
+      CryptURandom
+    ];
     meta = {
       description = "SASL Authentication framework";
       license = with lib.licenses; [
@@ -3312,6 +3322,13 @@ with self;
       url = "mirror://cpan/authors/id/E/ET/ETHER/Catalyst-Authentication-Credential-HTTP-1.018.tar.gz";
       hash = "sha256-b6GBbe5kSw216gzBXF5xHcLO0gg2JavOcJZSHx1lpSk=";
     };
+    patches = [
+      (fetchpatch {
+        name = "CVE-2025-40920.patch";
+        url = "https://github.com/perl-catalyst/Catalyst-Authentication-Credential-HTTP/commit/ad2c03aad95406db4ce35dfb670664ebde004c18.patch";
+        hash = "sha256-WI6JwvY6i3KkQO9HbbSvHPX8mgM8I2cF0UTjF1D14T4=";
+      })
+    ];
     buildInputs = [
       ModuleBuildTiny
       TestException
@@ -3321,6 +3338,7 @@ with self;
     propagatedBuildInputs = [
       CatalystPluginAuthentication
       ClassAccessor
+      CryptSysRandom
       DataUUID
       StringEscape
     ];
@@ -4580,10 +4598,10 @@ with self;
 
   CGISimple = buildPerlPackage {
     pname = "CGI-Simple";
-    version = "1.280";
+    version = "1.282";
     src = fetchurl {
-      url = "mirror://cpan/authors/id/M/MA/MANWAR/CGI-Simple-1.280.tar.gz";
-      hash = "sha256-GOAen/uBTl5O6neshImyBp/oNlGFUPN/bCIT61Wcar8=";
+      url = "mirror://cpan/authors/id/M/MA/MANWAR/CGI-Simple-1.282.tar.gz";
+      hash = "sha256-xX8PPjLN2AYSZFFVwbgptMy+TO1lXegzq5MAWYnCfy8=";
     };
     buildInputs = [
       TestException
@@ -6625,6 +6643,7 @@ with self;
       url = "mirror://cpan/authors/id/R/RU/RURBAN/Cpanel-JSON-XS-4.37.tar.gz";
       hash = "sha256-wkFhWg4X/3Raqoa79Gam4pzSQFFeZfBqegUBe2GebUs=";
     };
+    patches = [ ../development/perl-modules/Cpanel-JSON-XS-CVE-2025-40929.patch ];
     meta = {
       description = "CPanel fork of JSON::XS, fast and correct serializing";
       license = with lib.licenses; [
@@ -7478,6 +7497,22 @@ with self;
         gpl1Plus
       ];
       maintainers = [ maintainers.sgo ];
+    };
+  };
+
+  CryptSysRandom = buildPerlPackage {
+    pname = "Crypt-SysRandom";
+    version = "0.007";
+    src = fetchurl {
+      url = "mirror://cpan/authors/id/L/LE/LEONT/Crypt-SysRandom-0.007.tar.gz";
+      hash = "sha256-pdSemPyjxSZsea6YmoXsoik0sFiAPuSz5usI78pO70Y=";
+    };
+    meta = {
+      description = "Perl interface to system randomness";
+      license = with lib.licenses; [
+        artistic1
+        gpl1Plus
+      ];
     };
   };
 
@@ -10293,10 +10328,10 @@ with self;
 
   DBIxSearchBuilder = buildPerlPackage {
     pname = "DBIx-SearchBuilder";
-    version = "1.77";
+    version = "1.82";
     src = fetchurl {
-      url = "mirror://cpan/authors/id/B/BP/BPS/DBIx-SearchBuilder-1.77.tar.gz";
-      hash = "sha256-O/il1cjF/cYK0vY/Y/c90fZJP/TYJYcoOj4iM36P4HA=";
+      url = "mirror://cpan/authors/id/B/BP/BPS/DBIx-SearchBuilder-1.82.tar.gz";
+      hash = "sha256-3IDX5PRVdt4/2Ui2slD+3FAM/QCrzTC2qLLXeJV2uPE=";
     };
     buildInputs = [ DBDSQLite ];
     propagatedBuildInputs = [
@@ -13827,6 +13862,11 @@ with self;
       url = "mirror://cpan/authors/id/R/RE/REHSACK/File-ShareDir-1.118.tar.gz";
       hash = "sha256-O7KiC6Nd+VjcCk8jBvwF2QPYuMTePIvu/OF3OdKByVg=";
     };
+    # Fix dynamic loading not available when cross compiling
+    postPatch = lib.optionalString (stdenv.hostPlatform != stdenv.buildPlatform) ''
+      sed -i '/install_share/d' Makefile.PL
+      sed -i '/File::ShareDir::Install/d' Makefile.PL
+    '';
     propagatedBuildInputs = [ ClassInspector ];
     buildInputs = [ FileShareDirInstall ];
     meta = {
@@ -13836,8 +13876,6 @@ with self;
         artistic1
         gpl1Plus
       ];
-      # Can't load module IO, dynamic loading not available in this perl.
-      broken = !stdenv.buildPlatform.canExecute stdenv.hostPlatform;
     };
   };
 
@@ -16166,8 +16204,8 @@ with self;
     pname = "HTML-RewriteAttributes";
     version = "0.05";
     src = fetchurl {
-      url = "mirror://cpan/authors/id/T/TS/TSIBLEY/HTML-RewriteAttributes-0.05.tar.gz";
-      hash = "sha256-GAjsfN9A0nCFdf5hVaiPEDsX/sd5c6WDHC8kwlDnpYw=";
+      url = "mirror://cpan/authors/id/B/BP/BPS/HTML-RewriteAttributes-0.06.tar.gz";
+      hash = "sha256-vGQgAmEUL5pffgeG3FqySmMwvBm9Hj6btLbXwxYhtyI=";
     };
     propagatedBuildInputs = [ HTMLParser ];
     meta = {
@@ -18267,6 +18305,7 @@ with self;
       url = "mirror://cpan/authors/id/M/ML/MLEHMANN/JSON-XS-4.03.tar.gz";
       hash = "sha256-UVU29F8voafojIgkUzdY0BIdJnq5y0U6G1iHyKVrkGg=";
     };
+    patches = [ ../development/perl-modules/JSON-XS-CVE-2025-40928.patch ];
     propagatedBuildInputs = [ TypesSerialiser ];
     buildInputs = [ CanaryStability ];
     meta = {

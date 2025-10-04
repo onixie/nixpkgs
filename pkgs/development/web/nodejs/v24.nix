@@ -17,8 +17,8 @@ let
 in
 buildNodejs {
   inherit enableNpm;
-  version = "24.4.1";
-  sha256 = "adb79ca0987486ed66136213da19ff17ef6724dcb340c320e010c9442101652f";
+  version = "24.8.0";
+  sha256 = "1c03b362ebf4740d4758b9a3d3087e3de989f54823650ec80b47090ef414b2e0";
   patches =
     (
       if (stdenv.hostPlatform.emulatorAvailable buildPackages) then
@@ -47,10 +47,19 @@ buildNodejs {
     ++ [
       ./configure-armv6-vfpv2.patch
       ./disable-darwin-v8-system-instrumentation-node19.patch
-      ./bypass-darwin-xcrun-node16.patch
       ./node-npm-build-npm-package-logic.patch
       ./use-correct-env-in-tests.patch
       ./bin-sh-node-run-v22.patch
+
+      # TODO: newer GYP versions have been patched to be more compatible with Nix sandbox. We need
+      # to adapt our patch to this newer version, see https://github.com/NixOS/nixpkgs/pull/434742.
+      (fetchpatch2 {
+        url = "https://github.com/nodejs/node/commit/886e4b3b534a9f3ad2facbc99097419e06615900.patch?full_index=1";
+        hash = "sha256-dg/wVkD3iFS7RNjmvMDGw+ONScEjynlkRXqVxdF45TM=";
+        includes = [ "tools/gyp/pylib/gyp/xcode_emulation.py" ];
+        revert = true;
+      })
+      ./bypass-darwin-xcrun-node16.patch
     ]
     ++ lib.optionals (!stdenv.buildPlatform.isDarwin) [
       # test-icu-env is failing without the reverts

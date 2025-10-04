@@ -674,6 +674,7 @@
   ./services/hardware/tlp.nix
   ./services/hardware/trezord.nix
   ./services/hardware/triggerhappy.nix
+  ./services/hardware/tuned.nix
   ./services/hardware/tuxedo-rs.nix
   ./services/hardware/udev.nix
   ./services/hardware/udisks2.nix
@@ -796,6 +797,7 @@
   ./services/misc/clipcat.nix
   ./services/misc/clipmenu.nix
   ./services/misc/confd.nix
+  ./services/misc/conman.nix
   ./services/misc/cpuminer-cryptonight.nix
   ./services/misc/db-rest.nix
   ./services/misc/devmon.nix
@@ -1486,6 +1488,7 @@
   ./services/torrent/magnetico.nix
   ./services/torrent/opentracker.nix
   ./services/torrent/peerflix.nix
+  ./services/torrent/qbittorrent.nix
   ./services/torrent/rtorrent.nix
   ./services/torrent/torrentstream.nix
   ./services/torrent/transmission.nix

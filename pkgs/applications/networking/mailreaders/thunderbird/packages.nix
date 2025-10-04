@@ -94,8 +94,8 @@ rec {
   thunderbird = thunderbird-latest;
 
   thunderbird-latest = common {
-    version = "140.0.1";
-    sha512 = "fbef1d0228c49fc9c11425b6be03bb7e44e6abc6f2027ee23317270ca2c6b0a935bb41b38667acf014bd9e1166cbe62754f1e919e04f2355dc4c833e015c78b8";
+    version = "143.0";
+    sha512 = "128fb1ed35561cceb847b09c881968b474c9fc2cf7bf027f20c2d5b03366116e058b471f98cad4606a720f65d99c60ed3b4301b9e57b5971001adb3e00a51cc5";
 
     updateScript = callPackage ./update.nix {
       attrPath = "thunderbirdPackages.thunderbird-latest";
@@ -103,13 +103,26 @@ rec {
   };
 
   # Eventually, switch to an updateScript without versionPrefix hardcoded...
-  thunderbird-esr = thunderbird-128;
+  thunderbird-esr = thunderbird-140;
+
+  thunderbird-140 = common {
+    applicationName = "Thunderbird ESR";
+
+    version = "140.3.0esr";
+    sha512 = "82a9c4aa250b01e0e4d53890b0337972e46504636831c1b6307b841c4c5aeec86482b2da3c1666c46e870a75f6cb54db9f759664688b382ad66efa647145d900";
+
+    updateScript = callPackage ./update.nix {
+      attrPath = "thunderbirdPackages.thunderbird-140";
+      versionPrefix = "140";
+      versionSuffix = "esr";
+    };
+  };
 
   thunderbird-128 = common {
     applicationName = "Thunderbird ESR";
 
-    version = "128.12.0esr";
-    sha512 = "4566ae8347e959612a288524753416f5b730757f10a067b6eb11139055cc1fc5d63d49636e798e9b77588896c8dbc0f2acc189ebd29d95a5166e7bc8f2c35e30";
+    version = "128.14.0esr";
+    sha512 = "3ce2debe024ad8dafc319f86beff22feb9edecfabfad82513269e037a51210dfd84810fe35adcf76479273b8b2ceb8d4ecd2d0c6a3c5f6600b6b3df192bb798b";
 
     updateScript = callPackage ./update.nix {
       attrPath = "thunderbirdPackages.thunderbird-128";

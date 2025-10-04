@@ -211,14 +211,6 @@ in
           ];
         };
 
-        linux_6_15 = callPackage ../os-specific/linux/kernel/mainline.nix {
-          branch = "6.15";
-          kernelPatches = [
-            kernelPatches.bridge_stp_helper
-            kernelPatches.request_key_helper
-          ];
-        };
-
         linux_6_16 = callPackage ../os-specific/linux/kernel/mainline.nix {
           branch = "6.16";
           kernelPatches = [
@@ -319,6 +311,7 @@ in
         linux_6_11 = throw "linux 6.11 was removed because it has reached its end of life upstream";
         linux_6_13 = throw "linux 6.13 was removed because it has reached its end of life upstream";
         linux_6_14 = throw "linux 6.14 was removed because it has reached its end of life upstream";
+        linux_6_15 = throw "linux 6.15 was removed because it has reached its end of life upstream";
 
         linux_4_19_hardened = throw "linux 4.19 was removed because it will reach its end of life within 24.11";
         linux_6_9_hardened = throw "linux 6.9 was removed because it has reached its end of life upstream";
@@ -326,6 +319,7 @@ in
         linux_6_11_hardened = throw "linux 6.11 was removed because it has reached its end of life upstream";
         linux_6_13_hardened = throw "linux 6.13 was removed because it has reached its end of life upstream";
         linux_6_14_hardened = throw "linux 6.14 was removed because it has reached its end of life upstream";
+        linux_6_15_hardened = throw "linux 6.15 was removed because it has reached its end of life upstream";
 
         linux_ham = kernels.linux_latest;
       }
@@ -353,7 +347,12 @@ in
         inherit (kernel) stdenv; # in particular, use the same compiler by default
 
         # to help determine module compatibility
-        inherit (kernel) isZen isHardened isLibre;
+        inherit (kernel)
+          isLTS
+          isZen
+          isHardened
+          isLibre
+          ;
         inherit (kernel) kernelOlder kernelAtLeast;
         kernelModuleMakeFlags = self.kernel.commonMakeFlags ++ [
           "KBUILD_OUTPUT=${kernel.dev}/lib/modules/${kernel.modDirVersion}/build"
@@ -363,6 +362,8 @@ in
         inherit (pkgs) bcc bpftrace; # added 2021-12
         inherit (pkgs) oci-seccomp-bpf-hook; # added 2022-11
         inherit (pkgs) dpdk; # added 2024-03
+
+        acer-wmi-battery = callPackage ../os-specific/linux/acer-wmi-battery { };
 
         acpi_call = callPackage ../os-specific/linux/acpi-call { };
 
@@ -737,7 +738,6 @@ in
     linux_6_1 = recurseIntoAttrs (packagesFor kernels.linux_6_1);
     linux_6_6 = recurseIntoAttrs (packagesFor kernels.linux_6_6);
     linux_6_12 = recurseIntoAttrs (packagesFor kernels.linux_6_12);
-    linux_6_15 = recurseIntoAttrs (packagesFor kernels.linux_6_15);
     linux_6_16 = recurseIntoAttrs (packagesFor kernels.linux_6_16);
   }
   // lib.optionalAttrs config.allowAliases {
@@ -747,6 +747,7 @@ in
     linux_6_11 = throw "linux 6.11 was removed because it reached its end of life upstream"; # Added 2025-03-23
     linux_6_13 = throw "linux 6.13 was removed because it reached its end of life upstream"; # Added 2025-06-22
     linux_6_14 = throw "linux 6.14 was removed because it reached its end of life upstream"; # Added 2025-06-22
+    linux_6_15 = throw "linux 6.15 was removed because it reached its end of life upstream"; # Added 2025-08-23
   };
 
   rtPackages = {
@@ -792,7 +793,6 @@ in
       linux_libre = recurseIntoAttrs (packagesFor kernels.linux_libre);
 
       linux_latest_libre = recurseIntoAttrs (packagesFor kernels.linux_latest_libre);
-      __recurseIntoDerivationForReleaseJobs = true;
     }
     // lib.optionalAttrs config.allowAliases {
       linux_4_19_hardened = throw "linux 4.19 was removed because it will reach its end of life within 24.11";
@@ -802,6 +802,7 @@ in
       linux_ham = recurseIntoAttrs (packagesFor kernels.linux_latest);
       linux_6_13_hardened = throw "linux 6.13 was removed because it has reached its end of life upstream";
       linux_6_14_hardened = throw "linux 6.14 was removed because it has reached its end of life upstream";
+      linux_6_15_hardened = throw "linux 6.15 was removed because it has reached its end of life upstream";
     }
   );
 

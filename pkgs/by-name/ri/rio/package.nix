@@ -62,7 +62,6 @@ rustPlatform.buildRustPackage rec {
     hash = "sha256-ymu2t6J8s9SSGCc17ogNclVPgbQUeEJEqiR70LVsM9Q=";
   };
 
-  useFetchCargoVendor = true;
   cargoHash = "sha256-MXQDlA8FHZdgLmQtO6iFkxwftnq8EpIvprrO6zPK9BM=";
 
   nativeBuildInputs = [
@@ -134,7 +133,7 @@ rustPlatform.buildRustPackage rec {
 
   meta = {
     description = "Hardware-accelerated GPU terminal emulator powered by WebGPU";
-    homepage = "https://raphamorim.io/rio";
+    homepage = "https://rioterm.com/";
     license = lib.licenses.mit;
     maintainers = with lib.maintainers; [
       tornax

@@ -21,7 +21,6 @@ rustPlatform.buildRustPackage rec {
     sha256 = "sha256-w/PeSqj51gJOWmAV5UPMprntdzinX/IL49D2ZUMfeSM=";
   };
 
-  useFetchCargoVendor = true;
   cargoHash = "sha256-T9fZxv3aujYparzVphfYBJ+5ti/T1VkeCeCqWPyllY8=";
 
   buildInputs = lib.optionals stdenv.hostPlatform.isDarwin [
@@ -54,10 +53,7 @@ rustPlatform.buildRustPackage rec {
     description = "Tool to improve keyboard comfort and usability with advanced customization";
     homepage = "https://github.com/jtroo/kanata";
     license = licenses.lgpl3Only;
-    maintainers = with maintainers; [
-      bmanuel
-      linj
-    ];
+    maintainers = with maintainers; [ linj ];
     platforms = platforms.unix;
     mainProgram = "kanata";
   };
